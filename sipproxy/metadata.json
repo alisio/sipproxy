@@ -1,0 +1,13 @@
+{
+  "name": "sipproxy",
+  "version": "0.1.0",
+  "author": "Antonio Alisio de Meneses Cordeiro",
+  "summary": "SIP proxy based in Opensips, Opensips-CP, MariaDB and asterisk",
+  "license": "Apache 2.0",
+  "source": "https://github.com/alisio/sipproxy.git",
+  "project_page": "https://github.com/alisio/sipproxy",
+  "issues_url": "https://github.com/alisio/sipproxy/issues",
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 1.0.0"}
+  ]
+}
