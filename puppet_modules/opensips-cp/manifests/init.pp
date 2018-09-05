@@ -36,6 +36,7 @@
 # Copyright 2018 Your name here, unless otherwise noted.
 #
 class sipproxy {
-
-
+  include opensips
 }
+
+include sipproxy
