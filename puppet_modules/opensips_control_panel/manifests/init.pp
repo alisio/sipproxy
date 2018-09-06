@@ -47,6 +47,7 @@ class opensips_control_panel (
     $db_server_port = 3306,
     $db_root_pw = 'opensips',
     $db_opensips_db = 'opensips',
+    $db_opensips_user = 'opensips',
     $db_opensips_pw = 'opensipsrw',
     $opensips_cp_packages = ['httpd',
                             'php',
@@ -99,5 +100,20 @@ class opensips_control_panel (
       mode => '0644',
       owner => 'apache',
       group => 'apache'
+    }
+    file { '/root/ocp_sql_dump.sql':
+      ensure => file,
+      mode => '0644',
+      source => "puppet:///modules/${name}/ocp_sql_dump.sql",
+    }
+    mysql::db { $db_opensips_db:
+      user     => $db_opensips_user,
+      password => $db_opensips_pw,
+      host     => $db_server_ip,
+      grant    => ['ALL'],
+      sql      => '/root/ocp_sql_dump.sql',
+      import_cat_cmd => 'cat',
+      import_timeout => 900,
+      require => File['/root/ocp_sql_dump.sql'],
     }
   }
