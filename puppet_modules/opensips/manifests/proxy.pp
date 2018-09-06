@@ -55,6 +55,7 @@ class opensips::proxy(
   $proxy_transport = 'udp',
   $proxy_ip = $ipaddress,
   $proxy_port = 5060,
+  $proxy_eth_interface = 'eth0',
   ){
   package { 'epel-release':
     ensure => installed,
