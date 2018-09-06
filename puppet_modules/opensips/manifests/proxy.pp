@@ -70,13 +70,19 @@ class opensips::proxy(
     ensure => installed,
     require => Yumrepo['opensips'],
   }
+  file { $opensips_cfg:
+    ensure => file,
+    mode => '0644',
+    source => "puppet:///modules/opensips/$opensips_cfg",
+    require => Package[$opensips_packages],
+  }
   file_line { 'listen_interface_port':
     ensure            => present,
     path              => $opensips_cfg,
     match             => '^listen=.*',
     match_for_absence => true,
     line   => "listen=$proxy_transport:$proxy_ip:$proxy_port",
-    require => Package[$opensips_packages]
+    require => File[$opensips_cfg],
   }
   service { 'opensips':
     ensure => running,
