@@ -1,0 +1,13 @@
+<Directory <%= @opensips_cp_folder %>/web>
+  Options Indexes FollowSymLinks MultiViews
+  AllowOverride None
+  Order allow,deny
+  allow from all
+</Directory>
+<Directory <%= @opensips_cp_folder %>>
+  Options Indexes FollowSymLinks MultiViews
+  AllowOverride None
+  Order deny,allow
+  deny from all
+</Directory>
+Alias <%= @opensips_cp_alias_folder %> <%= @opensips_cp_folder %>/web

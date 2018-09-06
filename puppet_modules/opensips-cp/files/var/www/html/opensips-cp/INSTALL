@@ -1,0 +1,138 @@
+OpenSIPS Control Panel (OCP) Installation Guide
+-----------------------------------------------
+
+OpenSIPS Control Panel has been tested and developed mostly on Debian and Redhat Linux , but, being a web portal qualifies it to work also with other Linux distros and operating systems as well. Most of the paths and commands in this INSTALL guide are be debian/redhat specific.
+
+What do you need for running OCP?
+
+    A web server (this tutorial focuses only on Apache Web Server)
+    PHP and some of it's extensions
+    A DB server (mysql/postgres/sqlite/oracle etc)
+
+This tutorial assumes that your web directory is /var/www/ and the OCP files are located in /var/www/opensips-cp/ folder. Your web directory may depend on your Operating System or on the used web server.
+
+1. Apache
+----------
+
+1.1 Install Apache
+-------------------
+
+Depending on your Linux distro, do:
+
+    Debian-like: apt-get install apache2 libapache2-mod-php5 php5-curl
+    Redhat-like: yum install httpd
+
+1.2 Configure Apache
+--------------------
+
+Add the configuration below into one of Apache's existent VHOSTs or create a new one.
+
+	<Directory /var/www/opensips-cp/web>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+	<Directory /var/www/opensips-cp>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order deny,allow
+		deny from all
+	</Directory>
+	Alias /cp /var/www/opensips-cp/web
+
+	
+
+You can read more about Apache's VHOSTS here -> http://httpd.apache.org/docs/current/vhosts/examples.html.
+
+1.3 File permissions
+---------------------
+
+Apache is going to need write permissions on some files / folders in the opensips-cp directory, so you can do:
+
+    for debian: chown -R www-data:www-data /var/www/opensips-cp/
+    for redhat: chown -R apache:apache /var/www/opensips-cp/
+
+
+
+
+2. PHP
+------
+
+You must have PHP installed and enabled in the web server. In order to do that you will have to install php and some of it's extensions.
+
+    for debian: apt-get install php5 php5-gd php5-mysql php5-xmlrpc php-pear php5-cli php-apc
+    for redhat: yum install php php-gd php-mysql php-xmlrpc php-pear php-pecl-apc
+
+Check if these extensions are enabled :
+
+    for debian check /etc/php5/conf.d/ for mysql.ini, gd.ini, xmlrpc.ini
+    for redhat check /etc/php.d/ for mysql.ini, gd.ini, xmlrpc.in
+
+If these are not there plese check if you have installed them correctly.
+
+Do not forget to set in your php.ini (usaully /etc/php5/apache2/php.ini ) :
+
+	short_open_tag = On ;
+	
+
+MDB2 pear needs to be installed with the appropriate DB driver (mysql / postgresql / mssql / sqlite etc.)
+
+	pear install MDB2
+	pear install MDB2#mysql //should you choose to go with the mysql database
+	pear install log
+	
+
+Do not forge to restart Apache after all the php changes!!!
+
+
+
+
+3. Database server
+------------------
+
+The OpenSIPS Control Panel requires access to database for two purposes:
+
+    OCP related data, like login users and permissions, additional data related to some tools (like statistics to be monitored, etc)
+    OpenSIPS data, access to the OpenSIPS data to allow OCP to provision different OpenSIPS modules
+
+While for the first case you need to create some extra table (usually you can create them directly into the opensips database), for the OpenSIPS database you need to configure only the aceess info (see the configuration chapter).
+
+The OpenSIPS Control Panel can connect to a remote database server, so the DB server can be used from the SIP Server machine or another machine in the network.
+
+
+3.1 User access and privileges
+------------------------------
+
+For the admin tools (create and list) you must add a new table. The admin users are the login users into OCP.
+
+Install the ocp_admin_privileges table schema (we only provide the schema for mysql and pgsql). From the opensips-cp/ folder run:
+
+	mysql -Dopensips -p < config/tools/admin/add_admin/ocp_admin_privileges.mysql
+	or
+	psql -h host_name -U postgres_username -d opensips < config/tools/admin/add_admin/ocp_admin_privileges.pgsql
+	
+
+This will create the ocp_admin_privileges table into the opensips database. Next step is to insert a first login user into the table (user 'admin' with password 'admin' with full privileges):
+
+	INSERT INTO ocp_admin_privileges (username,password,first_name,last_name,ha1,available_tools,permissions) values ('admin','admin','admin','admin',md5('admin:admin'),'all','all');
+	
+
+3.2 Statistics Monitor tool
+---------------------------
+
+For the Statistics Monitor (smonitor) tool you must add two tables to the OpenSIPS database:
+
+	mysql -Dopensips -p < config/tools/system/smonitor/tables.mysql
+	or
+	psql -h host_name -U postgres_username -d opensips < config/tools/system/smonitor/tables.pgsql
+	
+
+In order to allow OCP to sample the statistics from the OpenSIPS boxes, you need to install some cron jobs. First edit the config/tools/system/smonitor/opensips_stats_cron file and change/correct the path to your OpenSIPS Control Panel installation:
+
+Now simply install the cron jobs by doing:
+
+	cp config/tools/system/smonitor/opensips_stats_cron /etc/cron.d/
+	
+
+NOTE: you may need to restart the cron service at this point. 

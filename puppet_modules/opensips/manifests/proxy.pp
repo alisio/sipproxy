@@ -36,7 +36,7 @@
 # Copyright 2018 Your name here, unless otherwise noted.
 #
 
-class opensips(
+class opensips::proxy(
   $db_mode='no',
   $db_server_ip = 'localhost',
   $db_server_port = 3306,
@@ -87,5 +87,8 @@ class opensips(
   }
   if $db_mode == 'yes' {
     #TODO  do db stuff here
+    notify{'db message':
+      message => 'Do database stuff here'
+    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "opensips",
+  "name": "opensips-cp",
   "version": "0.1.0",
   "author": "Antonio Alisio de Meneses Cordeiro",
   "summary": "Control Panel for Opensips based sip proxy",
