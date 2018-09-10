@@ -43,6 +43,7 @@ management, etc.) this is the time to mention it.
 If your module requires anything extra before setting up (pluginsync enabled,
 etc.), mention it here.
 
+```bash
 yum install -y epel-release
 sudo rpm -Uvh https://yum.puppet.com/puppet5/puppet5-release-el-7.noarch.rpm
 yum install -y puppet-agent git
@@ -54,7 +55,7 @@ git clone https://github.com/alisio/sipproxy.git
 ln -s /usr/src/sipproxy/puppet_modules/opensips /etc/puppetlabs/code/environments/production/modules/opensips
 ln -s /usr/src/sipproxy/puppet_modules/opensips_control_panel /etc/puppetlabs/code/environments/production/modules/opensips_control_panel
 puppet apply /usr/src/sipproxy/puppet_modules/sipproxy.pp
-
+```
 
 ### Beginning with sipproxy
 
