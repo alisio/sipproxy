@@ -3,7 +3,7 @@
  * $Id: local.inc.php 210 2010-03-08 18:09:33Z bogdan_iancu $
  * Copyright (C) 2011 OpenSIPS Project
  *
- * This file is part of opensips-cp, a free Web Control Panel Application for 
+ * This file is part of opensips-cp, a free Web Control Panel Application for
  * OpenSIPS SIP server.
  *
  * opensips-cp is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  */
 
 ###############################################################################
- 
+
  $config->results_per_page = 25;
  $config->results_page_range = 10;
 
@@ -30,6 +30,6 @@
  $config->table_acls = "grp";
 
  // list with the name of the groups defined in OpenSIPS cfg
- $config->grps = array("grp_one","grp_two","grp_three");
- 
+ $config->grps = array("RESTRITO","REDE","FIXO-LOCAL","CELULAR-LOCAL","FIXO-LD","CELULAR-LD","DDI","0300");
+
 ?>

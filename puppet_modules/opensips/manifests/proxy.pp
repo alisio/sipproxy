@@ -37,7 +37,7 @@
 #
 
 class opensips::proxy(
-  $db_mode='no',
+  $db_mode='yes',
   $db_server_ip = 'localhost',
   $db_server_port = 3306,
   $db_root_pw = 'opensips',
@@ -72,32 +72,47 @@ class opensips::proxy(
     ensure => installed,
     require => Yumrepo['opensips'],
   }
-  file { $opensips_cfg:
-    ensure => file,
-    mode => '0644',
-    content => template("opensips/${opensips_cfg}.erb"),
-    require => Package[$opensips_packages],
-    notify => Service['opensips']
-  }
-  file_line { 'listen_interface_port':
-    ensure            => present,
-    path              => $opensips_cfg,
-    match             => '^listen=.*',
-    match_for_absence => true,
-    line   => "listen=$proxy_transport:$proxy_ip:$proxy_port",
-    require => File[$opensips_cfg],
+  if $db_mode == 'yes' {
+    file { $opensips_cfg:
+      ensure => file,
+      mode => '0644',
+      content => template("opensips/${opensips_cfg}.erb"),
+      require => Package[$opensips_packages],
+      notify => Service['opensips']
+    }
+    file { '/etc/opensips/opensipsctlrc':
+      ensure => file,
+      mode => '0644',
+      content => template("opensips/etc/opensips/opensipsctlrc.erb"),
+      require => Package[$opensips_packages],
+      notify => Service['opensips']
+    }
+    exec { 'adicionar dominio':
+      command => "opensipsctl domain add $proxy_ip",
+      unless  =>  "opensipsctl domain show | egrep $proxy_ip",
+      path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
+      require => Service['opensips'],
+    }
+  } else {
+    file { $opensips_cfg:
+      ensure => file,
+      mode => '0644',
+      content => template("opensips/${opensips_cfg}.nodb.erb"),
+      require => Package[$opensips_packages],
+      notify => Service['opensips']
+    }
+    file { '/etc/opensips/opensipsctlrc':
+      ensure => file,
+      mode => '0644',
+      content => template("opensips/etc/opensips/opensipsctlrc.nodb.erb"),
+      require => Package[$opensips_packages],
+      notify => Service['opensips']
+    }
   }
   service { 'opensips':
     ensure => running,
     enable => true,
     hasrestart => true,
     hasstatus  => true,
-    require => File_line['listen_interface_port'],
-  }
-  if $db_mode == 'yes' {
-    #TODO  do db stuff here
-    notify{'db message':
-      message => 'Do database stuff here'
-    }
   }
 }
