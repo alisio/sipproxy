@@ -33,11 +33,11 @@
  $config->attrs_cb=array(
 					// name , description
 					array("3","usrloc"),
-					array("4","routing"),
-					array("5","service"),
-					array("d","Descr d"),
-					array("e","Descr e"),
-					array("f","Descr f"),
+					array("4","roteamento"),
+					array("5","servico"),
+					// array("d","Descr d"),
+					// array("e","Descr e"),
+					// array("f","Descr f"),
 					);
  $config->cb_per_row = 3;
  $talk_to_this_assoc_id = 1 ;
@@ -45,6 +45,6 @@
 // Dialplan - Add/Edit new Translation Rule - Attributes input type
 // 0 - checkboxes
 // 1 - text
-$dialplan_attributes_mode = 1 ;
+$dialplan_attributes_mode = 0 ;
 
 ?>

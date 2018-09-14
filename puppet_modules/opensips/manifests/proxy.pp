@@ -42,6 +42,7 @@ class opensips::proxy(
   $db_server_port = 3306,
   $db_root_pw = 'opensips',
   $db_opensips_db = 'opensips',
+  $db_opensips_user = 'opensips',
   $db_opensips_pw = 'opensipsrw',
   $opensips_packages = ['opensips',
                         'opensips-db_mysql',
@@ -74,8 +75,9 @@ class opensips::proxy(
   file { $opensips_cfg:
     ensure => file,
     mode => '0644',
-    source => "puppet:///modules/opensips/$opensips_cfg",
+    content => template("opensips/${opensips_cfg}.erb"),
     require => Package[$opensips_packages],
+    notify => Service['opensips']
   }
   file_line { 'listen_interface_port':
     ensure            => present,
