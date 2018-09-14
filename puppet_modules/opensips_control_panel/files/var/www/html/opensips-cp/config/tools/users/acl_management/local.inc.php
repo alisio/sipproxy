@@ -30,6 +30,6 @@
  $config->table_acls = "grp";
 
  // list with the name of the groups defined in OpenSIPS cfg
- $config->grps = array("RESTRITO","REDE","FIXO-LOCAL","CELULAR-LOCAL","FIXO-LD","CELULAR-LD","DDI","0300");
+ $config->grps = array("RESTRITO","INTERNO","LOCAL","CELULAR","DDD","DDD_E_CELULAR","DDI","DDI_E_CELULAR","LIBERADO","0300");
 
 ?>
