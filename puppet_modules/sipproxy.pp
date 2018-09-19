@@ -2,6 +2,9 @@ node default {
   class { 'mysql::server':
     root_password => 'opensips',
   }
-  include 'opensips::proxy'
+  class {'opensips::proxy':
+    opensips_script_mode => 'trunking',
+  }
+
   include 'opensips_control_panel'
 }

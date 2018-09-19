@@ -37,7 +37,7 @@
 #
 
 class opensips::proxy(
-  $db_mode='yes',
+  $db_mode='db', # db or nodb
   $db_server_ip = 'localhost',
   $db_server_port = 3306,
   $db_root_pw = 'opensips',
@@ -52,6 +52,7 @@ class opensips::proxy(
                         'opensips-pua_usrloc'],
   $opensips_cfg = '/etc/opensips/opensips.cfg',
   $opensips_ctlrc = '/etc/opensips/opensipsctlrc',
+  $opensips_script_mode = 'default', # default, trunking
   $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.3/releases/el/7/$basearch',
   $proxy_transport = 'udp',
   $proxy_ip = $ipaddress,
@@ -72,41 +73,27 @@ class opensips::proxy(
     ensure => installed,
     require => Yumrepo['opensips'],
   }
-  if $db_mode == 'yes' {
-    file { $opensips_cfg:
-      ensure => file,
-      mode => '0644',
-      content => template("opensips/${opensips_cfg}.erb"),
-      require => Package[$opensips_packages],
-      notify => Service['opensips']
-    }
-    file { '/etc/opensips/opensipsctlrc':
-      ensure => file,
-      mode => '0644',
-      content => template("opensips/etc/opensips/opensipsctlrc.erb"),
-      require => Package[$opensips_packages],
-      notify => Service['opensips']
-    }
+  file { $opensips_cfg:
+    ensure => file,
+    mode => '0644',
+    content => template("opensips/etc/opensips/opensips-${db_mode}-${opensips_script_mode}.cfg.erb"),
+    require => Package[$opensips_packages],
+    notify => Service['opensips']
+  }
+  file { '/etc/opensips/opensipsctlrc':
+    ensure => file,
+    mode => '0644',
+    content => template("opensips/etc/opensips/opensipsctlrc-${db_mode}.erb"),
+    require => Package[$opensips_packages],
+    notify => Service['opensips']
+  }
+  if $db_mode == 'db' {
+
     exec { 'adicionar dominio':
       command => "opensipsctl domain add $proxy_ip",
       unless  =>  "opensipsctl domain show | egrep $proxy_ip",
       path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
       require => Service['opensips'],
-    }
-  } else {
-    file { $opensips_cfg:
-      ensure => file,
-      mode => '0644',
-      content => template("opensips/${opensips_cfg}.nodb.erb"),
-      require => Package[$opensips_packages],
-      notify => Service['opensips']
-    }
-    file { '/etc/opensips/opensipsctlrc':
-      ensure => file,
-      mode => '0644',
-      content => template("opensips/etc/opensips/opensipsctlrc.nodb.erb"),
-      require => Package[$opensips_packages],
-      notify => Service['opensips']
     }
   }
   service { 'opensips':
