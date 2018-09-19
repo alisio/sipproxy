@@ -71,6 +71,12 @@ for upgrading, you may wish to include an additional section here: Upgrading
 Put the classes, types, and resources for customizing, configuring, and doing
 the fancy stuff with your module here.
 
+In trunking mode:
+1. Add desired domains
+2. Add trunks ip, mask, port and protocol (udp, tls) using permission module
+1. Add gateways and rules to Dynamic routing module
+3. Add dialplan rules do dialplan module
+
 ## Reference
 
 Here, list the classes, types, providers, facts, etc contained in your module.

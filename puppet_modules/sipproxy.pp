@@ -5,6 +5,6 @@ node default {
   class {'opensips::proxy':
     opensips_script_mode => 'trunking',
   }
-
   include 'opensips_control_panel'
+  Class['mysql::server'] -> Class['opensips::proxy'] -> Class['opensips_control_panel']
 }
