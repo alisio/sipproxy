@@ -73,9 +73,9 @@ the fancy stuff with your module here.
 
 In trunking mode:
 1. Add desired domains
-2. Add trunks ip, mask, port and protocol (udp, tls) using permission module
-1. Add gateways and rules to Dynamic routing module
-3. Add dialplan rules do dialplan module
+2. Add trunks ip, mask, port and protocol (udp, tls) using permission module (group 1)
+1. Add gateways and rules to Dynamic routing module (GroupIP 1)
+3. Add dialplan rules do dialplan module with ID 0
 
 ## Reference
 
