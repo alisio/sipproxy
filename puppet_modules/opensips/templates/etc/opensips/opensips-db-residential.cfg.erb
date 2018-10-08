@@ -38,8 +38,9 @@ auto_aliases=no
 
 
 listen=<%= @proxy_transport %>:<%= @proxy_ip %>:<%= @proxy_port %>   # CUSTOMIZE ME
-<!-- listen=tcp:127.0.0.1:5060   # CUSTOMIZE ME
-listen=tls:127.0.0.1:5061   # CUSTOMIZE ME  -->
+
+
+
 
 ####### Modules Section ########
 
@@ -81,17 +82,13 @@ loadmodule "uri.so"
 modparam("uri", "use_uri_table", 0)
 
 
-
-
-
-
-
 #### MYSQL module
 loadmodule "db_mysql.so"
 
 #### HTTPD module
 loadmodule "httpd.so"
-modparam("httpd", "port", 8888)
+modparam("httpd", "port", 8080)
+loadmodule "mi_json.so"
 
 #### USeR LOCation module
 loadmodule "usrloc.so"
@@ -117,8 +114,6 @@ modparam("acc", "report_cancels", 0)
    if you enable this parameter, be sure the enable "append_fromtag"
    in "rr" module */
 modparam("acc", "detect_direction", 0)
-modparam("acc", "db_url",
-	"mysql://<%= @db_opensips_user %>:<%= @db_opensips_pw %>@<%= @db_server_ip %>/<%= @db_opensips_db %>") # CUSTOMIZE ME
 
 
 #### AUTHentication modules
@@ -145,14 +140,6 @@ modparam("domain", "db_mode", 1)   # Use caching
 modparam("auth_db|usrloc|uri", "use_domain", 1)
 
 
-#### PRESENCE modules
-loadmodule "xcap.so"
-loadmodule "presence.so"
-loadmodule "presence_xml.so"
-modparam("xcap|presence", "db_url",
-	"mysql://<%= @db_opensips_user %>:<%= @db_opensips_pw %>@<%= @db_server_ip %>/<%= @db_opensips_db %>") # CUSTOMIZE ME
-modparam("presence_xml", "force_active", 1)
-modparam("presence", "server_address", "sip:127.0.0.1:5060") # CUSTOMIZE ME
 
 
 #### DIALOG module
@@ -195,15 +182,6 @@ loadmodule "mi_http.so"
 loadmodule "proto_udp.so"
 
 loadmodule "proto_tcp.so"
-loadmodule "proto_tls.so"
-loadmodule "tls_mgm.so"
-modparam("tls_mgm","verify_cert", "1")
-modparam("tls_mgm","require_cert", "0")
-modparam("tls_mgm","tls_method", "TLSv1")
-modparam("tls_mgm","certificate", "/usr/local/etc/opensips/tls/user/user-cert.pem")
-modparam("tls_mgm","private_key", "/usr/local/etc/opensips/tls/user/user-privkey.pem")
-modparam("tls_mgm","ca_list", "/usr/local/etc/opensips/tls/user/user-calist.pem")
-
 
 
 ####### Routing Logic ########
@@ -241,8 +219,7 @@ route{
 
 			if (is_method("BYE")) {
 				# do accounting even if the transaction fails
-				do_accounting("db","failed");
-
+				do_accounting("log","failed");
 			} else if (is_method("INVITE")) {
 				# even if in most of the cases is useless, do RR for
 				# re-INVITEs alos, as some buggy clients do change route set
@@ -257,11 +234,7 @@ route{
 			# in $du (destination URI).
 			route(relay);
 		} else {
-			if (is_method("SUBSCRIBE") && $rd == "127.0.0.1:5060") { # CUSTOMIZE ME
-				# in-dialog subscribe requests
-				route(handle_presence);
-				exit;
-			}
+
 			if ( is_method("ACK") ) {
 				if ( t_check_trans() ) {
 					# non loose-route, but stateful ACK; must be an ACK after
@@ -342,29 +315,23 @@ route{
 			exit;
 		}
 
-		do_accounting("db");
-
+		do_accounting("log");
 	}
 
 
 	if (!is_uri_host_local()) {
 		append_hf("P-hint: outbound\r\n");
 
-		# if you have some interdomain connections via TLS
-		## CUSTOMIZE IF NEEDED
-		##if ($rd=="tls_domain1.net"
-		## || $rd=="tls_domain2.net"
-		##) {
-		##	force_send_socket(tls:127.0.0.1:5061); # CUSTOMIZE
-		##}
-
 		route(relay);
 	}
 
 	# requests for my domain
 
-	if( is_method("PUBLISH|SUBSCRIBE"))
-			route(handle_presence);
+	if (is_method("PUBLISH|SUBSCRIBE"))
+	{
+		sl_send_reply("503", "Service Unavailable");
+		exit;
+	}
 
 	if (is_method("REGISTER"))
 	{
@@ -381,7 +348,7 @@ route{
 			exit;
 		}
 
-		if ( proto==TCP || proto==TLS || 0 ) setflag(TCP_PERSISTENT);
+		if ( proto==TCP ||  0 ) setflag(TCP_PERSISTENT);
 
 		if (isflagset(NAT)) {
 			setbflag(SIP_PING_FLAG);
@@ -436,8 +403,7 @@ route{
 	if (isbflagset(NAT)) setflag(NAT);
 
 	# when routing via usrloc, log the missed calls also
-	do_accounting("db","missed");
-
+	do_accounting("log","missed");
 	route(relay);
 }
 
@@ -466,27 +432,6 @@ route[relay] {
 }
 
 
-# Presence route
-route[handle_presence]
-{
-	if (!t_newtran())
-	{
-		sl_reply_error();
-		exit;
-	}
-
-	if(is_method("PUBLISH"))
-	{
-		handle_publish();
-	}
-	else
-	if( is_method("SUBSCRIBE"))
-	{
-		handle_subscribe();
-	}
-
-	exit;
-}
 
 
 branch_route[per_branch_ops] {
@@ -529,7 +474,7 @@ failure_route[missed_call] {
 local_route {
 	if (is_method("BYE") && $DLG_dir=="UPSTREAM") {
 
-		acc_db_request("200 Dialog Timeout", "acc");
+		acc_log_request("200 Dialog Timeout");
 
 	}
 }
