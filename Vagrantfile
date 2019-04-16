@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -69,5 +69,12 @@ Vagrant.configure("2") do |config|
     #sudo sed -i 's/\(PATH=$PATH.*\)/\1:\/opt\/puppetlabs\/bin/g' /root/.bash_profile
     sudo /opt/puppetlabs/bin/puppet module install puppetlabs-mysql --version 6.0.0
     sudo /opt/puppetlabs/bin/puppet module install puppetlabs-stdlib --version 4.25.1
+    sudo ln -s /vagrant/puppet_modules/opensips /etc/puppetlabs/code/modules/opensips
+    sudo ln -s /vagrant/puppet_modules/opensips_control_panel /etc/puppetlabs/code/modules/opensips_control_panel
   SHELL
+  config.vm.provision "puppet" do |puppet|
+    # puppet.manifests_path = "../puppet_modules/"
+    puppet.manifests_path = ["vm", "/vagrant/puppet_modules"]
+    puppet.manifest_file = "sipproxy.pp"
+  end
 end

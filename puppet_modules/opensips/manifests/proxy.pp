@@ -59,15 +59,12 @@ class opensips::proxy(
   $proxy_port = 5060,
   $proxy_eth_interface = 'eth0',
   ){
-  package { 'epel-release':
-    ensure => installed,
-  }
   yumrepo { 'opensips':
     baseurl => $opensips_yum_repo_baseurl,
     descr => 'Opensips repository',
     enabled => '1',
     gpgcheck => '0',
-    require => Package['epel-release'],
+    # require => Package['epel-release'],
   }
   package { $opensips_packages:
     ensure => installed,

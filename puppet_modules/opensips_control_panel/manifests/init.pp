@@ -55,7 +55,7 @@ class opensips_control_panel (
                             'php-mysql',
                             'php-xmlrpc',
                             'php-pear',
-                            'php-pecl-apc',
+                            'php-pecl-apcu',
                             'unzip',
                             'wget'],
     $proxy_transport = 'udp',
@@ -63,11 +63,12 @@ class opensips_control_panel (
     $opensips_cp_folder = '/var/www/html/opensips-cp',
     $opensips_cp_alias_folder = '/cp',
     ){
-    package { $opensips_cp_packages:
-      ensure => installed,
-      notify => Exec['install pear packages'],
-    }
-    service { 'httpd':
+    realize Package['epel-release']
+    -> package { $opensips_cp_packages:
+     ensure => installed,
+     notify => Exec['install pear packages'],
+   }
+    ~> service { 'httpd':
       ensure => running,
       enable => true,
       hasrestart => true,
