@@ -53,12 +53,12 @@ class opensips::proxy(
                         'sngrep'],
   $opensips_cfg = '/etc/opensips/opensips.cfg',
   $opensips_ctlrc = '/etc/opensips/opensipsctlrc',
-  $opensips_script_mode = 'default', # default, trunking
-  $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.3/releases/el/7/$basearch',
+  $opensips_script_mode = 'default', # default, trunking, residential
+  $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.4/releases/el/7/$basearch',
   $proxy_transport = 'udp',
-  $proxy_ip = $ipaddress,
+  #$proxy_ip = $ipaddress,
   $proxy_port = 5060,
-  $proxy_eth_interface = 'eth0',
+  $proxy_eth_interface = $interfaces,
   ){
   yumrepo { 'opensips':
     baseurl => $opensips_yum_repo_baseurl,

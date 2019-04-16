@@ -1,4 +1,4 @@
-#
+# default DB residential
 # OpenSIPS residential configuration script
 #     by OpenSIPS Solutions <team@opensips-solutions.com>
 #
@@ -37,7 +37,21 @@ children=4
 auto_aliases=no
 
 
-listen=<%= @proxy_transport %>:<%= @proxy_ip %>:<%= @proxy_port %>   # CUSTOMIZE ME
+<%
+if @proxy_eth_interface.count(',') > 0 then
+    @proxy_eth_interface.split(',').each do |int|
+        if has_variable?("ipaddress_#{int}") then
+            -%>listen=<%= @proxy_transport %>:<%= scope.lookupvar("ipaddress_#{int}") %>:<%= @proxy_port %>
+<%
+        end
+    end
+else
+    interface = @proxy_eth_interface
+    if has_variable?("ipaddress_#{interface}") then
+        -%>listen=<%= @proxy_transport %>:<%= scope.lookupvar("ipaddress_#{interface}") %>:<%= @proxy_port %><%
+    end
+end
+-%>
 
 
 
