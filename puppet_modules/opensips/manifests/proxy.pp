@@ -49,7 +49,8 @@ class opensips::proxy(
                         'opensips-httpd',
                         'opensips-json',
                         'opensips-pua',
-                        'opensips-pua_usrloc'],
+                        'opensips-pua_usrloc',
+                        'sngrep'],
   $opensips_cfg = '/etc/opensips/opensips.cfg',
   $opensips_ctlrc = '/etc/opensips/opensipsctlrc',
   $opensips_script_mode = 'default', # default, trunking
@@ -66,7 +67,14 @@ class opensips::proxy(
     gpgcheck => '0',
     # require => Package['epel-release'],
   }
-  package { $opensips_packages:
+  -> yumrepo { 'irontec':
+    baseurl => 'http://packages.irontec.com/centos/$releasever/$basearch/',
+    descr => 'irontec repository',
+    enabled => '1',
+    gpgcheck => '0',
+    # require => Package['epel-release'],
+  }
+  -> package { $opensips_packages:
     ensure => installed,
     require => Yumrepo['opensips'],
   }
