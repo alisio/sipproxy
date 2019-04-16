@@ -1,5 +1,6 @@
 node default {
   package { [ 'epel-release',
+              'mlocate',
               'net-tools',
               'ngrep',
               'telnet']:
