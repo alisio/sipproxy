@@ -69,6 +69,7 @@ Vagrant.configure("2") do |config|
     #sudo sed -i 's/\(PATH=$PATH.*\)/\1:\/opt\/puppetlabs\/bin/g' /root/.bash_profile
     sudo /opt/puppetlabs/bin/puppet module install puppetlabs-mysql --version 6.0.0
     sudo /opt/puppetlabs/bin/puppet module install puppetlabs-stdlib --version 4.25.1
+    sudo /opt/puppetlabs/bin/puppet module install puppet-selinux --version 1.6.1
     sudo ln -s /vagrant/puppet_modules/opensips /etc/puppetlabs/code/modules/opensips
     sudo ln -s /vagrant/puppet_modules/opensips_control_panel /etc/puppetlabs/code/modules/opensips_control_panel
   SHELL

@@ -5,6 +5,9 @@ node default {
               'telnet']:
     ensure => installed,
   }
+  -> class {'selinux':
+    mode => 'disabled',
+  }
   -> class { 'mysql::server':
     root_password => 'opensips',
   }
