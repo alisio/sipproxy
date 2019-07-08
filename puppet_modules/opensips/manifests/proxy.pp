@@ -49,27 +49,32 @@ class opensips::proxy(
                         'opensips-httpd',
                         'opensips-json',
                         'opensips-pua',
-                        'opensips-pua_usrloc'],
+                        'opensips-pua_usrloc',
+                        'sngrep'],
   $opensips_cfg = '/etc/opensips/opensips.cfg',
   $opensips_ctlrc = '/etc/opensips/opensipsctlrc',
-  $opensips_script_mode = 'default', # default, trunking
-  $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.3/releases/el/7/$basearch',
+  $opensips_script_mode = 'default', # default, trunking, residential
+  $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.4/releases/el/7/$basearch',
   $proxy_transport = 'udp',
-  $proxy_ip = $ipaddress,
+  #$proxy_ip = $ipaddress,
   $proxy_port = 5060,
-  $proxy_eth_interface = 'eth0',
+  $proxy_eth_interface = $interfaces,
   ){
-  package { 'epel-release':
-    ensure => installed,
-  }
   yumrepo { 'opensips':
     baseurl => $opensips_yum_repo_baseurl,
     descr => 'Opensips repository',
     enabled => '1',
     gpgcheck => '0',
-    require => Package['epel-release'],
+    # require => Package['epel-release'],
   }
-  package { $opensips_packages:
+  -> yumrepo { 'irontec':
+    baseurl => 'http://packages.irontec.com/centos/$releasever/$basearch/',
+    descr => 'irontec repository',
+    enabled => '1',
+    gpgcheck => '0',
+    # require => Package['epel-release'],
+  }
+  -> package { $opensips_packages:
     ensure => installed,
     require => Yumrepo['opensips'],
   }
