@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+$agent_hostname_prefix = "agent"
+$agent_memory = 1024
+$agent_count = 3
+
+$script = <<SCRIPT
+########
+vboxVersion=5.2.22
+asteriskVersion=11
+releasever=7
+basearch=x86_64
+########
+[[ -f /etc/provisioned.ok ]] && echo Already provisioned && exit
+yum install -y --nogpgcheck dnf epel-release gcc kernel-devel kernel-headers dkms make net-tools bzip2 perl vim wget
+cd /root/
+[[ ! -f /root/VBoxGuestAdditions_$vboxVersion.iso ]] && wget http://download.virtualbox.org/virtualbox/$vboxVersion/VBoxGuestAdditions_$vboxVersion.iso
+mkdir /media/VirtualBoxGuestAdditions
+mount -t iso9660 -o loop /root/VBoxGuestAdditions_$vboxVersion.iso /media/VirtualBoxGuestAdditions
+rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-${releasever}.noarch.rpm
+KERN_DIR=/usr/src/kernels/`uname -r`/build
+export KERN_DIR
+cd /media/VirtualBoxGuestAdditions
+sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
+./VBoxLinuxAdditions.run
+if [ "$?" == "1" ]; then
+  yum update -y kernel
+  touch /etc/provisioned.ok
+  reboot
+fi
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.synced_folder "../puppet_modules", "/vagrant", type: "virtualbox"
+
+  (1..$agent_count).each do |i|
+    config.vm.define vm_name = $agent_hostname_prefix + "%d" % i do |agent|
+    agent.vm.hostname = vm_name
+    agent.vm.network "private_network", ip: "10.3#{i}.8.10"
+#      config.vm.network :forwarded_port, guest: 22, host: "1000#{-1+i}"
+      agent.vm.provider "virtualbox" do |vb|
+        vb.gui = false
+        vb.memory = $agent_memory
+      end
+      agent.vm.synced_folder ".", "/vagrant", type: "virtualbox"
+      agent.vm.provision "shell", inline: $script
+    end
+  end
+end

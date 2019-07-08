@@ -1,3 +1,14 @@
+vagrant up agent1 agent2 agent3
+vagrant provision agent1 agent2 agent3
+vagrant reload agent1 agent2 agent3
+
+vagrant provision
+vagrant reload
+vagrant provision
+
+
+
+
 # sipproxy
 
 #### Table of Contents
@@ -30,6 +41,7 @@ If your module has a range of functionality (installation, configuration,
 management, etc.) this is the time to mention it.
 
 ## Setup
+
 
 ### What sipproxy affects
 
