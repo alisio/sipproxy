@@ -242,7 +242,7 @@ route{
 	#
 	force_rport();
 	if (nat_uac_test("18")) {
-		if (method=="REGISTER") {
+		if (is_method("REGISTER")) {
 			fix_nated_register();
 		} else {
 			fix_nated_contact();

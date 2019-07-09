@@ -14,6 +14,5 @@ node default {
   }
   -> class {'opensips_control_panel':}
   -> class {'opensips::proxy':
-    opensips_script_mode => 'trunking',
   }
 }

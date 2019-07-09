@@ -56,7 +56,7 @@ class opensips::proxy(
   $opensips_script_mode = 'default', # default, trunking, residential
   $opensips_yum_repo_baseurl = 'http://yum.opensips.org/2.4/releases/el/7/$basearch',
   $proxy_transport = 'udp',
-  #$proxy_ip = $ipaddress,
+  $proxy_ip = $ipaddress,
   $proxy_port = 5060,
   $proxy_eth_interface = $interfaces,
   ){
