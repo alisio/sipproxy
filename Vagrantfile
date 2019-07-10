@@ -66,6 +66,8 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     sudo rpm -Uvh https://yum.puppet.com/puppet5/puppet5-release-el-7.noarch.rpm
+    # Adicionada linha abaixo pro problemas no acesso ao repositorio oficial
+    #sudo rpm -Uvh http://10.200.176.123/centos/puppet-agent-5.5.8-1.el7.x86_64.rpm
     sudo yum install -y git puppet-agent vim-enhanced --nogpgcheck
     #sudo sed -i 's/\(PATH=$PATH.*\)/\1:\/opt\/puppetlabs\/bin/g' /root/.bash_profile
     sudo /opt/puppetlabs/bin/puppet module install puppetlabs-mysql --version 6.0.0

@@ -48,9 +48,13 @@ class opensips::proxy(
                         'opensips-db_mysql',
                         'opensips-httpd',
                         'opensips-json',
+                        'opensips-proto_tls',
+                        'opensips-tls_mgm',
                         'opensips-pua',
                         'opensips-pua_usrloc',
-                        'sngrep'],
+                        'sngrep',
+                        'tcpdump'
+                        ],
   $opensips_cfg = '/etc/opensips/opensips.cfg',
   $opensips_ctlrc = '/etc/opensips/opensipsctlrc',
   $opensips_script_mode = 'default', # default, trunking, residential
@@ -61,49 +65,48 @@ class opensips::proxy(
   $proxy_eth_interface = $interfaces,
   ){
   yumrepo { 'opensips':
-    baseurl => $opensips_yum_repo_baseurl,
-    descr => 'Opensips repository',
-    enabled => '1',
+    baseurl  => $opensips_yum_repo_baseurl,
+    descr    => 'Opensips repository',
+    enabled  => '1',
     gpgcheck => '0',
     # require => Package['epel-release'],
   }
   -> yumrepo { 'irontec':
-    baseurl => 'http://packages.irontec.com/centos/$releasever/$basearch/',
-    descr => 'irontec repository',
-    enabled => '1',
+    baseurl  => 'http://packages.irontec.com/centos/$releasever/$basearch/',
+    descr    => 'irontec repository',
+    enabled  => '1',
     gpgcheck => '0',
     # require => Package['epel-release'],
   }
   -> package { $opensips_packages:
-    ensure => installed,
+    ensure  => installed,
     require => Yumrepo['opensips'],
   }
   file { $opensips_cfg:
-    ensure => file,
-    mode => '0644',
+    ensure  => file,
+    mode    => '0644',
     content => template("opensips/etc/opensips/opensips-${db_mode}-${opensips_script_mode}.cfg.erb"),
     require => Package[$opensips_packages],
-    notify => Service['opensips']
+    notify  => Service['opensips']
   }
   file { '/etc/opensips/opensipsctlrc':
-    ensure => file,
-    mode => '0644',
+    ensure  => file,
+    mode    => '0644',
     content => template("opensips/etc/opensips/opensipsctlrc-${db_mode}.erb"),
     require => Package[$opensips_packages],
-    notify => Service['opensips']
+    notify  => Service['opensips']
   }
   if $db_mode == 'db' {
-
     exec { 'adicionar dominio':
-      command => "opensipsctl domain add $proxy_ip",
-      unless  =>  "opensipsctl domain show | egrep $proxy_ip",
-      path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
+      command => "opensipsctl domain add ${proxy_ip};opensipsctl domain reload",
+      unless  =>  "opensipsctl domain show | egrep ${proxy_ip}",
+      path    => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
       require => Service['opensips'],
     }
   }
   service { 'opensips':
-    ensure => running,
-    enable => true,
+    ensure     => running,
+    enable     => true,
     hasrestart => true,
     hasstatus  => true,
   }

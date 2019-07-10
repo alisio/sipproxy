@@ -11,3 +11,8 @@
   deny from all
 </Directory>
 Alias <%= @opensips_cp_alias_folder %> <%= @opensips_cp_folder %>/web
+
+<DirectoryMatch "<%= @opensips_cp_folder %>/web/tools/.*/.*/(template|custom_actions|lib)/">
+  Order deny,allow
+  deny from all
+</DirectoryMatch>

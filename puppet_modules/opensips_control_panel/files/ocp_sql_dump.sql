@@ -1,8 +1,8 @@
 -- MySQL dump 10.14  Distrib 5.5.60-MariaDB, for Linux (x86_64)
 --
--- Host: bancodedados    Database: opensips
+-- Host: localhost    Database: opensips
 -- ------------------------------------------------------
--- Server version	10.3.8-MariaDB-1:10.3.8+maria~bionic
+-- Server version	5.5.60-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -31,13 +31,10 @@ CREATE TABLE `acc` (
   `sip_code` char(3) NOT NULL DEFAULT '',
   `sip_reason` char(32) NOT NULL DEFAULT '',
   `time` datetime NOT NULL,
-  `duration` int(11) unsigned NOT NULL DEFAULT 0,
-  `ms_duration` int(11) unsigned NOT NULL DEFAULT 0,
-  `setuptime` int(11) unsigned NOT NULL DEFAULT 0,
+  `duration` int(11) unsigned NOT NULL DEFAULT '0',
+  `ms_duration` int(11) unsigned NOT NULL DEFAULT '0',
+  `setuptime` int(11) unsigned NOT NULL DEFAULT '0',
   `created` datetime DEFAULT NULL,
-  `caller_id` char(64) NOT NULL,
-  `callee_id` char(64) NOT NULL,
-  `leg_type` char(10) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `callid_idx` (`callid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -61,7 +58,7 @@ DROP TABLE IF EXISTS `active_watchers`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `active_watchers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `presentity_uri` char(128) NOT NULL,
+  `presentity_uri` char(255) NOT NULL,
   `watcher_username` char(64) NOT NULL,
   `watcher_domain` char(64) NOT NULL,
   `to_user` char(64) NOT NULL,
@@ -73,14 +70,15 @@ CREATE TABLE `active_watchers` (
   `callid` char(64) NOT NULL,
   `local_cseq` int(11) NOT NULL,
   `remote_cseq` int(11) NOT NULL,
-  `contact` char(128) NOT NULL,
-  `record_route` text DEFAULT NULL,
+  `contact` char(255) NOT NULL,
+  `record_route` text,
   `expires` int(11) NOT NULL,
-  `status` int(11) NOT NULL DEFAULT 2,
+  `status` int(11) NOT NULL DEFAULT '2',
   `reason` char(64) DEFAULT NULL,
-  `version` int(11) NOT NULL DEFAULT 0,
+  `version` int(11) NOT NULL DEFAULT '0',
   `socket_info` char(64) NOT NULL,
-  `local_contact` char(128) NOT NULL,
+  `local_contact` char(255) NOT NULL,
+  `sharing_tag` char(32) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `active_watchers_idx` (`presentity_uri`,`callid`,`to_tag`,`from_tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -104,10 +102,10 @@ DROP TABLE IF EXISTS `address`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `address` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `grp` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `grp` smallint(5) unsigned NOT NULL DEFAULT '0',
   `ip` char(50) NOT NULL,
-  `mask` tinyint(4) NOT NULL DEFAULT 32,
-  `port` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `mask` tinyint(4) NOT NULL DEFAULT '32',
+  `port` smallint(5) unsigned NOT NULL DEFAULT '0',
   `proto` char(4) NOT NULL DEFAULT 'any',
   `pattern` char(64) DEFAULT NULL,
   `context_info` char(32) DEFAULT NULL,
@@ -125,46 +123,6 @@ LOCK TABLES `address` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `aliases`
---
-
-DROP TABLE IF EXISTS `aliases`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aliases` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `username` char(64) NOT NULL DEFAULT '',
-  `domain` char(64) NOT NULL DEFAULT '',
-  `contact` char(255) NOT NULL DEFAULT '',
-  `received` char(128) DEFAULT NULL,
-  `path` char(255) DEFAULT NULL,
-  `expires` datetime NOT NULL DEFAULT '2020-05-28 21:32:15',
-  `q` float(10,2) NOT NULL DEFAULT 1.00,
-  `callid` char(255) NOT NULL DEFAULT 'Default-Call-ID',
-  `cseq` int(11) NOT NULL DEFAULT 13,
-  `last_modified` datetime NOT NULL DEFAULT '1900-01-01 00:00:01',
-  `flags` int(11) NOT NULL DEFAULT 0,
-  `cflags` char(255) DEFAULT NULL,
-  `user_agent` char(255) NOT NULL DEFAULT '',
-  `socket` char(64) DEFAULT NULL,
-  `methods` int(11) DEFAULT NULL,
-  `sip_instance` char(255) DEFAULT NULL,
-  `attr` char(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `alias_idx` (`username`,`domain`,`contact`,`callid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `aliases`
---
-
-LOCK TABLES `aliases` WRITE;
-/*!40000 ALTER TABLE `aliases` DISABLE KEYS */;
-/*!40000 ALTER TABLE `aliases` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `b2b_entities`
 --
 
@@ -175,9 +133,9 @@ CREATE TABLE `b2b_entities` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `type` int(2) NOT NULL,
   `state` int(2) NOT NULL,
-  `ruri` char(128) DEFAULT NULL,
-  `from_uri` char(128) NOT NULL,
-  `to_uri` char(128) NOT NULL,
+  `ruri` char(255) DEFAULT NULL,
+  `from_uri` char(255) NOT NULL,
+  `to_uri` char(255) NOT NULL,
   `from_dname` char(64) DEFAULT NULL,
   `to_dname` char(64) DEFAULT NULL,
   `tag0` char(64) NOT NULL,
@@ -185,20 +143,20 @@ CREATE TABLE `b2b_entities` (
   `callid` char(64) NOT NULL,
   `cseq0` int(11) NOT NULL,
   `cseq1` int(11) DEFAULT NULL,
-  `contact0` char(128) NOT NULL,
-  `contact1` char(128) DEFAULT NULL,
-  `route0` text DEFAULT NULL,
-  `route1` text DEFAULT NULL,
+  `contact0` char(255) NOT NULL,
+  `contact1` char(255) DEFAULT NULL,
+  `route0` text,
+  `route1` text,
   `sockinfo_srv` char(64) DEFAULT NULL,
-  `param` char(128) NOT NULL,
+  `param` char(255) NOT NULL,
   `lm` int(11) NOT NULL,
   `lrc` int(11) DEFAULT NULL,
   `lic` int(11) DEFAULT NULL,
   `leg_cseq` int(11) DEFAULT NULL,
-  `leg_route` text DEFAULT NULL,
+  `leg_route` text,
   `leg_tag` char(64) DEFAULT NULL,
-  `leg_contact` char(128) DEFAULT NULL,
-  `leg_sockinfo` char(128) DEFAULT NULL,
+  `leg_contact` char(255) DEFAULT NULL,
+  `leg_sockinfo` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `b2b_entities_idx` (`type`,`tag0`,`tag1`,`callid`),
   KEY `b2b_entities_param` (`param`)
@@ -232,22 +190,22 @@ CREATE TABLE `b2b_logic` (
   `sparam2` char(64) DEFAULT NULL,
   `sparam3` char(64) DEFAULT NULL,
   `sparam4` char(64) DEFAULT NULL,
-  `sdp` tinytext DEFAULT NULL,
-  `lifetime` int(10) NOT NULL DEFAULT 0,
+  `sdp` tinytext,
+  `lifetime` int(10) NOT NULL DEFAULT '0',
   `e1_type` int(2) NOT NULL,
   `e1_sid` char(64) DEFAULT NULL,
-  `e1_from` char(128) NOT NULL,
-  `e1_to` char(128) NOT NULL,
+  `e1_from` char(255) NOT NULL,
+  `e1_to` char(255) NOT NULL,
   `e1_key` char(64) NOT NULL,
   `e2_type` int(2) NOT NULL,
   `e2_sid` char(64) DEFAULT NULL,
-  `e2_from` char(128) NOT NULL,
-  `e2_to` char(128) NOT NULL,
+  `e2_from` char(255) NOT NULL,
+  `e2_to` char(255) NOT NULL,
   `e2_key` char(64) NOT NULL,
   `e3_type` int(2) DEFAULT NULL,
   `e3_sid` char(64) DEFAULT NULL,
-  `e3_from` char(128) DEFAULT NULL,
-  `e3_to` char(128) DEFAULT NULL,
+  `e3_from` char(255) DEFAULT NULL,
+  `e3_to` char(255) DEFAULT NULL,
   `e3_key` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `b2b_logic_idx` (`si_key`)
@@ -273,8 +231,8 @@ DROP TABLE IF EXISTS `cachedb`;
 CREATE TABLE `cachedb` (
   `keyname` char(255) NOT NULL,
   `value` text NOT NULL,
-  `counter` int(10) NOT NULL DEFAULT 0,
-  `expires` int(10) unsigned NOT NULL DEFAULT 0,
+  `counter` int(10) NOT NULL DEFAULT '0',
+  `expires` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`keyname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -297,13 +255,13 @@ DROP TABLE IF EXISTS `carrierfailureroute`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `carrierfailureroute` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `carrier` int(10) unsigned NOT NULL DEFAULT 0,
+  `carrier` int(10) unsigned NOT NULL DEFAULT '0',
   `domain` char(64) NOT NULL DEFAULT '',
   `scan_prefix` char(64) NOT NULL DEFAULT '',
-  `host_name` char(128) NOT NULL DEFAULT '',
+  `host_name` char(255) NOT NULL DEFAULT '',
   `reply_code` char(3) NOT NULL DEFAULT '',
-  `flags` int(11) unsigned NOT NULL DEFAULT 0,
-  `mask` int(11) unsigned NOT NULL DEFAULT 0,
+  `flags` int(11) unsigned NOT NULL DEFAULT '0',
+  `mask` int(11) unsigned NOT NULL DEFAULT '0',
   `next_domain` char(64) NOT NULL DEFAULT '',
   `description` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -328,14 +286,14 @@ DROP TABLE IF EXISTS `carrierroute`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `carrierroute` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `carrier` int(10) unsigned NOT NULL DEFAULT 0,
+  `carrier` int(10) unsigned NOT NULL DEFAULT '0',
   `domain` char(64) NOT NULL DEFAULT '',
   `scan_prefix` char(64) NOT NULL DEFAULT '',
-  `flags` int(11) unsigned NOT NULL DEFAULT 0,
-  `mask` int(11) unsigned NOT NULL DEFAULT 0,
-  `prob` float NOT NULL DEFAULT 0,
-  `strip` int(11) unsigned NOT NULL DEFAULT 0,
-  `rewrite_host` char(128) NOT NULL DEFAULT '',
+  `flags` int(11) unsigned NOT NULL DEFAULT '0',
+  `mask` int(11) unsigned NOT NULL DEFAULT '0',
+  `prob` float NOT NULL DEFAULT '0',
+  `strip` int(11) unsigned NOT NULL DEFAULT '0',
+  `rewrite_host` char(255) NOT NULL DEFAULT '',
   `rewrite_prefix` char(64) NOT NULL DEFAULT '',
   `rewrite_suffix` char(64) NOT NULL DEFAULT '',
   `description` char(255) DEFAULT NULL,
@@ -363,9 +321,9 @@ CREATE TABLE `cc_agents` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `agentid` char(128) NOT NULL,
   `location` char(128) NOT NULL,
-  `logstate` int(10) unsigned NOT NULL DEFAULT 0,
+  `logstate` int(10) unsigned NOT NULL DEFAULT '0',
   `skills` char(255) NOT NULL,
-  `last_call_end` int(11) NOT NULL DEFAULT 0,
+  `last_call_end` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_agentid` (`agentid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -427,15 +385,15 @@ CREATE TABLE `cc_cdrs` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `caller` char(64) NOT NULL,
   `received_timestamp` datetime NOT NULL,
-  `wait_time` int(11) unsigned NOT NULL DEFAULT 0,
-  `pickup_time` int(11) unsigned NOT NULL DEFAULT 0,
-  `talk_time` int(11) unsigned NOT NULL DEFAULT 0,
+  `wait_time` int(11) unsigned NOT NULL DEFAULT '0',
+  `pickup_time` int(11) unsigned NOT NULL DEFAULT '0',
+  `talk_time` int(11) unsigned NOT NULL DEFAULT '0',
   `flow_id` char(128) NOT NULL,
   `agent_id` char(128) DEFAULT NULL,
-  `call_type` int(11) NOT NULL DEFAULT -1,
-  `rejected` int(11) unsigned NOT NULL DEFAULT 0,
-  `fstats` int(11) unsigned NOT NULL DEFAULT 0,
-  `cid` int(11) unsigned DEFAULT 0,
+  `call_type` int(11) NOT NULL DEFAULT '-1',
+  `rejected` int(11) unsigned NOT NULL DEFAULT '0',
+  `fstats` int(11) unsigned NOT NULL DEFAULT '0',
+  `cid` int(11) unsigned DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -459,7 +417,7 @@ DROP TABLE IF EXISTS `cc_flows`;
 CREATE TABLE `cc_flows` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `flowid` char(64) NOT NULL,
-  `priority` int(11) unsigned NOT NULL DEFAULT 256,
+  `priority` int(11) unsigned NOT NULL DEFAULT '256',
   `skill` char(64) NOT NULL,
   `prependcid` char(32) NOT NULL,
   `message_welcome` char(128) DEFAULT NULL,
@@ -490,12 +448,11 @@ CREATE TABLE `clusterer` (
   `cluster_id` int(10) NOT NULL,
   `node_id` int(10) NOT NULL,
   `url` char(64) NOT NULL,
-  `state` int(1) NOT NULL DEFAULT 1,
-  `ls_seq_no` int(10) NOT NULL DEFAULT 0,
-  `top_seq_no` int(10) NOT NULL DEFAULT 0,
-  `no_ping_retries` int(10) NOT NULL DEFAULT 3,
-  `priority` int(10) NOT NULL DEFAULT 50,
+  `state` int(1) NOT NULL DEFAULT '1',
+  `no_ping_retries` int(10) NOT NULL DEFAULT '3',
+  `priority` int(10) NOT NULL DEFAULT '50',
   `sip_addr` char(64) DEFAULT NULL,
+  `flags` char(64) DEFAULT NULL,
   `description` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `clusterer_idx` (`cluster_id`,`node_id`)
@@ -522,8 +479,8 @@ CREATE TABLE `cpl` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` char(64) NOT NULL,
   `domain` char(64) NOT NULL DEFAULT '',
-  `cpl_xml` text DEFAULT NULL,
-  `cpl_bin` text DEFAULT NULL,
+  `cpl_xml` text,
+  `cpl_bin` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_idx` (`username`,`domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -576,9 +533,9 @@ DROP TABLE IF EXISTS `dialog`;
 CREATE TABLE `dialog` (
   `dlg_id` bigint(10) unsigned NOT NULL,
   `callid` char(255) NOT NULL,
-  `from_uri` char(128) NOT NULL,
+  `from_uri` char(255) NOT NULL,
   `from_tag` char(64) NOT NULL,
-  `to_uri` char(128) NOT NULL,
+  `to_uri` char(255) NOT NULL,
   `to_tag` char(64) NOT NULL,
   `mangled_from_uri` char(64) DEFAULT NULL,
   `mangled_to_uri` char(64) DEFAULT NULL,
@@ -586,20 +543,20 @@ CREATE TABLE `dialog` (
   `callee_cseq` char(11) NOT NULL,
   `caller_ping_cseq` int(11) unsigned NOT NULL,
   `callee_ping_cseq` int(11) unsigned NOT NULL,
-  `caller_route_set` text DEFAULT NULL,
-  `callee_route_set` text DEFAULT NULL,
-  `caller_contact` char(128) DEFAULT NULL,
-  `callee_contact` char(128) DEFAULT NULL,
+  `caller_route_set` text,
+  `callee_route_set` text,
+  `caller_contact` char(255) DEFAULT NULL,
+  `callee_contact` char(255) DEFAULT NULL,
   `caller_sock` char(64) NOT NULL,
   `callee_sock` char(64) NOT NULL,
   `state` int(10) unsigned NOT NULL,
   `start_time` int(10) unsigned NOT NULL,
   `timeout` int(10) unsigned NOT NULL,
-  `vars` blob DEFAULT NULL,
-  `profiles` text DEFAULT NULL,
-  `script_flags` int(10) unsigned NOT NULL DEFAULT 0,
-  `module_flags` int(10) unsigned NOT NULL DEFAULT 0,
-  `flags` int(10) unsigned NOT NULL DEFAULT 0,
+  `vars` blob,
+  `profiles` text,
+  `script_flags` int(10) unsigned NOT NULL DEFAULT '0',
+  `module_flags` int(10) unsigned NOT NULL DEFAULT '0',
+  `flags` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`dlg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -630,8 +587,8 @@ CREATE TABLE `dialplan` (
   `subst_exp` char(64) DEFAULT NULL,
   `repl_exp` char(32) DEFAULT NULL,
   `timerec` char(255) DEFAULT NULL,
-  `disabled` int(11) NOT NULL DEFAULT 0,
-  `attrs` char(32) DEFAULT NULL,
+  `disabled` int(11) NOT NULL DEFAULT '0',
+  `attrs` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -654,12 +611,12 @@ DROP TABLE IF EXISTS `dispatcher`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dispatcher` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `setid` int(11) NOT NULL DEFAULT 0,
+  `setid` int(11) NOT NULL DEFAULT '0',
   `destination` char(192) NOT NULL DEFAULT '',
   `socket` char(128) DEFAULT NULL,
-  `state` int(11) NOT NULL DEFAULT 0,
+  `state` int(11) NOT NULL DEFAULT '0',
   `weight` char(64) NOT NULL DEFAULT '1',
-  `priority` int(11) NOT NULL DEFAULT 0,
+  `priority` int(11) NOT NULL DEFAULT '0',
   `attrs` char(128) NOT NULL DEFAULT '',
   `description` char(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
@@ -741,8 +698,8 @@ CREATE TABLE `dr_carriers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `carrierid` char(64) NOT NULL,
   `gwlist` char(255) NOT NULL,
-  `flags` int(11) unsigned NOT NULL DEFAULT 0,
-  `state` int(11) unsigned NOT NULL DEFAULT 0,
+  `flags` int(11) unsigned NOT NULL DEFAULT '0',
+  `state` int(11) unsigned NOT NULL DEFAULT '0',
   `attrs` char(255) DEFAULT NULL,
   `description` char(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -769,13 +726,13 @@ DROP TABLE IF EXISTS `dr_gateways`;
 CREATE TABLE `dr_gateways` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `gwid` char(64) NOT NULL,
-  `type` int(11) unsigned NOT NULL DEFAULT 0,
+  `type` int(11) unsigned NOT NULL DEFAULT '0',
   `address` char(128) NOT NULL,
-  `strip` int(11) unsigned NOT NULL DEFAULT 0,
+  `strip` int(11) unsigned NOT NULL DEFAULT '0',
   `pri_prefix` char(16) DEFAULT NULL,
   `attrs` char(255) DEFAULT NULL,
-  `probe_mode` int(11) unsigned NOT NULL DEFAULT 0,
-  `state` int(11) unsigned NOT NULL DEFAULT 0,
+  `probe_mode` int(11) unsigned NOT NULL DEFAULT '0',
+  `state` int(11) unsigned NOT NULL DEFAULT '0',
   `socket` char(128) DEFAULT NULL,
   `description` char(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -803,7 +760,7 @@ CREATE TABLE `dr_groups` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` char(64) NOT NULL,
   `domain` char(128) DEFAULT NULL,
-  `groupid` int(11) unsigned NOT NULL DEFAULT 0,
+  `groupid` int(11) unsigned NOT NULL DEFAULT '0',
   `description` char(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -865,7 +822,7 @@ CREATE TABLE `dr_rules` (
   `groupid` char(255) NOT NULL,
   `prefix` char(64) NOT NULL,
   `timerec` char(255) DEFAULT NULL,
-  `priority` int(11) NOT NULL DEFAULT 0,
+  `priority` int(11) NOT NULL DEFAULT '0',
   `routeid` char(255) DEFAULT NULL,
   `gwlist` char(255) NOT NULL,
   `attrs` char(255) DEFAULT NULL,
@@ -894,8 +851,8 @@ CREATE TABLE `emergency_report` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `callid` char(25) NOT NULL,
   `selectiveRoutingID` char(11) NOT NULL,
-  `routingESN` int(5) unsigned NOT NULL DEFAULT 0,
-  `npa` int(3) unsigned NOT NULL DEFAULT 0,
+  `routingESN` int(5) unsigned NOT NULL DEFAULT '0',
+  `npa` int(3) unsigned NOT NULL DEFAULT '0',
   `esgwri` char(50) NOT NULL,
   `lro` char(20) NOT NULL,
   `VPC_organizationName` char(50) NOT NULL,
@@ -926,8 +883,8 @@ DROP TABLE IF EXISTS `emergency_routing`;
 CREATE TABLE `emergency_routing` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `selectiveRoutingID` char(11) NOT NULL,
-  `routingESN` int(5) unsigned NOT NULL DEFAULT 0,
-  `npa` int(3) unsigned NOT NULL DEFAULT 0,
+  `routingESN` int(5) unsigned NOT NULL DEFAULT '0',
+  `npa` int(3) unsigned NOT NULL DEFAULT '0',
   `esgwri` char(50) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1009,6 +966,33 @@ LOCK TABLES `fraud_detection` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `freeswitch`
+--
+
+DROP TABLE IF EXISTS `freeswitch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `freeswitch` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `username` char(64) DEFAULT NULL,
+  `password` char(64) NOT NULL,
+  `ip` char(20) NOT NULL,
+  `port` int(11) NOT NULL DEFAULT '8021',
+  `events_csv` char(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `freeswitch`
+--
+
+LOCK TABLES `freeswitch` WRITE;
+/*!40000 ALTER TABLE `freeswitch` DISABLE KEYS */;
+/*!40000 ALTER TABLE `freeswitch` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `globalblacklist`
 --
 
@@ -1018,7 +1002,7 @@ DROP TABLE IF EXISTS `globalblacklist`;
 CREATE TABLE `globalblacklist` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `prefix` char(64) NOT NULL DEFAULT '',
-  `whitelist` tinyint(1) NOT NULL DEFAULT 0,
+  `whitelist` tinyint(1) NOT NULL DEFAULT '0',
   `description` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `globalblacklist_idx` (`prefix`)
@@ -1123,10 +1107,10 @@ DROP TABLE IF EXISTS `load_balancer`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `load_balancer` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `group_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `group_id` int(11) unsigned NOT NULL DEFAULT '0',
   `dst_uri` char(128) NOT NULL,
   `resources` char(255) NOT NULL,
-  `probe_mode` int(11) unsigned NOT NULL DEFAULT 0,
+  `probe_mode` int(11) unsigned NOT NULL DEFAULT '0',
   `description` char(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `dsturi_idx` (`dst_uri`)
@@ -1154,19 +1138,20 @@ CREATE TABLE `location` (
   `username` char(64) NOT NULL DEFAULT '',
   `domain` char(64) DEFAULT NULL,
   `contact` char(255) NOT NULL DEFAULT '',
-  `received` char(128) DEFAULT NULL,
+  `received` char(255) DEFAULT NULL,
   `path` char(255) DEFAULT NULL,
-  `expires` datetime NOT NULL DEFAULT '2020-05-28 21:32:15',
-  `q` float(10,2) NOT NULL DEFAULT 1.00,
+  `expires` int(10) unsigned NOT NULL,
+  `q` float(10,2) NOT NULL DEFAULT '1.00',
   `callid` char(255) NOT NULL DEFAULT 'Default-Call-ID',
-  `cseq` int(11) NOT NULL DEFAULT 13,
+  `cseq` int(11) NOT NULL DEFAULT '13',
   `last_modified` datetime NOT NULL DEFAULT '1900-01-01 00:00:01',
-  `flags` int(11) NOT NULL DEFAULT 0,
+  `flags` int(11) NOT NULL DEFAULT '0',
   `cflags` char(255) DEFAULT NULL,
   `user_agent` char(255) NOT NULL DEFAULT '',
   `socket` char(64) DEFAULT NULL,
   `methods` int(11) DEFAULT NULL,
   `sip_instance` char(255) DEFAULT NULL,
+  `kv_store` text,
   `attr` char(255) DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1197,7 +1182,7 @@ CREATE TABLE `missed_calls` (
   `sip_code` char(3) NOT NULL DEFAULT '',
   `sip_reason` char(32) NOT NULL DEFAULT '',
   `time` datetime NOT NULL,
-  `setuptime` int(11) unsigned NOT NULL DEFAULT 0,
+  `setuptime` int(11) unsigned NOT NULL DEFAULT '0',
   `created` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `callid_idx` (`callid`)
@@ -1211,85 +1196,6 @@ CREATE TABLE `missed_calls` (
 LOCK TABLES `missed_calls` WRITE;
 /*!40000 ALTER TABLE `missed_calls` DISABLE KEYS */;
 /*!40000 ALTER TABLE `missed_calls` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `monitored_stats`
---
-
-DROP TABLE IF EXISTS `monitored_stats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `monitored_stats` (
-  `name` varchar(64) NOT NULL,
-  `extra` varchar(64) NOT NULL,
-  `box_id` mediumint(8) unsigned NOT NULL DEFAULT 0,
-  PRIMARY KEY (`name`,`box_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `monitored_stats`
---
-
-LOCK TABLES `monitored_stats` WRITE;
-/*!40000 ALTER TABLE `monitored_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `monitored_stats` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `monitoring_stats`
---
-
-DROP TABLE IF EXISTS `monitoring_stats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `monitoring_stats` (
-  `name` varchar(64) NOT NULL,
-  `time` int(11) NOT NULL,
-  `value` varchar(64) NOT NULL DEFAULT '0',
-  `box_id` mediumint(8) unsigned NOT NULL DEFAULT 0,
-  PRIMARY KEY (`name`,`time`,`box_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `monitoring_stats`
---
-
-LOCK TABLES `monitoring_stats` WRITE;
-/*!40000 ALTER TABLE `monitoring_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `monitoring_stats` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ocp_admin_privileges`
---
-
-DROP TABLE IF EXISTS `ocp_admin_privileges`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ocp_admin_privileges` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(64) NOT NULL DEFAULT '',
-  `last_name` varchar(64) NOT NULL DEFAULT '',
-  `username` varchar(64) NOT NULL DEFAULT '',
-  `password` varchar(64) NOT NULL DEFAULT '',
-  `ha1` varchar(256) DEFAULT '',
-  `available_tools` varchar(512) NOT NULL DEFAULT '',
-  `permissions` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=56 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ocp_admin_privileges`
---
-
-LOCK TABLES `ocp_admin_privileges` WRITE;
-/*!40000 ALTER TABLE `ocp_admin_privileges` DISABLE KEYS */;
-INSERT INTO `ocp_admin_privileges` VALUES (55,'Admin','Istrator','admin','admin','d2abaa37a7c3db1137d385e1d8c15fd2','all','all');
-/*!40000 ALTER TABLE `ocp_admin_privileges` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1307,9 +1213,9 @@ CREATE TABLE `presentity` (
   `etag` char(64) NOT NULL,
   `expires` int(11) NOT NULL,
   `received_time` int(11) NOT NULL,
-  `body` blob DEFAULT NULL,
-  `extra_hdrs` blob DEFAULT NULL,
-  `sender` char(128) DEFAULT NULL,
+  `body` blob,
+  `extra_hdrs` blob,
+  `sender` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `presentity_idx` (`username`,`domain`,`event`,`etag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1333,7 +1239,7 @@ DROP TABLE IF EXISTS `pua`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pua` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `pres_uri` char(128) NOT NULL,
+  `pres_uri` char(255) NOT NULL,
   `pres_id` char(255) NOT NULL,
   `event` int(11) NOT NULL,
   `expires` int(11) NOT NULL,
@@ -1341,17 +1247,17 @@ CREATE TABLE `pua` (
   `flag` int(11) NOT NULL,
   `etag` char(64) DEFAULT NULL,
   `tuple_id` char(64) DEFAULT NULL,
-  `watcher_uri` char(128) DEFAULT NULL,
-  `to_uri` char(128) DEFAULT NULL,
+  `watcher_uri` char(255) DEFAULT NULL,
+  `to_uri` char(255) DEFAULT NULL,
   `call_id` char(64) DEFAULT NULL,
   `to_tag` char(64) DEFAULT NULL,
   `from_tag` char(64) DEFAULT NULL,
   `cseq` int(11) DEFAULT NULL,
-  `record_route` text DEFAULT NULL,
-  `contact` char(128) DEFAULT NULL,
-  `remote_contact` char(128) DEFAULT NULL,
+  `record_route` text,
+  `contact` char(255) DEFAULT NULL,
+  `remote_contact` char(255) DEFAULT NULL,
   `version` int(11) DEFAULT NULL,
-  `extra_headers` text DEFAULT NULL,
+  `extra_headers` text,
   PRIMARY KEY (`id`),
   KEY `del1_idx` (`pres_uri`,`event`),
   KEY `del2_idx` (`expires`),
@@ -1378,7 +1284,7 @@ DROP TABLE IF EXISTS `re_grp`;
 CREATE TABLE `re_grp` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `reg_exp` char(128) NOT NULL DEFAULT '',
-  `group_id` int(11) NOT NULL DEFAULT 0,
+  `group_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `group_idx` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1402,13 +1308,13 @@ DROP TABLE IF EXISTS `registrant`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `registrant` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `registrar` char(128) NOT NULL DEFAULT '',
-  `proxy` char(128) DEFAULT NULL,
-  `aor` char(128) NOT NULL DEFAULT '',
-  `third_party_registrant` char(128) DEFAULT NULL,
+  `registrar` char(255) NOT NULL DEFAULT '',
+  `proxy` char(255) DEFAULT NULL,
+  `aor` char(255) NOT NULL DEFAULT '',
+  `third_party_registrant` char(255) DEFAULT NULL,
   `username` char(64) DEFAULT NULL,
   `password` char(64) DEFAULT NULL,
-  `binding_URI` char(128) NOT NULL DEFAULT '',
+  `binding_URI` char(255) NOT NULL DEFAULT '',
   `binding_params` char(64) DEFAULT NULL,
   `expiry` int(1) unsigned DEFAULT NULL,
   `forced_socket` char(64) DEFAULT NULL,
@@ -1436,7 +1342,7 @@ DROP TABLE IF EXISTS `rls_presentity`;
 CREATE TABLE `rls_presentity` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `rlsubs_did` char(255) NOT NULL,
-  `resource_uri` char(128) NOT NULL,
+  `resource_uri` char(255) NOT NULL,
   `content_type` char(255) NOT NULL,
   `presence_state` blob NOT NULL,
   `expires` int(11) NOT NULL,
@@ -1467,7 +1373,7 @@ DROP TABLE IF EXISTS `rls_watchers`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `rls_watchers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `presentity_uri` char(128) NOT NULL,
+  `presentity_uri` char(255) NOT NULL,
   `to_user` char(64) NOT NULL,
   `to_domain` char(64) NOT NULL,
   `watcher_username` char(64) NOT NULL,
@@ -1480,13 +1386,13 @@ CREATE TABLE `rls_watchers` (
   `local_cseq` int(11) NOT NULL,
   `remote_cseq` int(11) NOT NULL,
   `contact` char(64) NOT NULL,
-  `record_route` text DEFAULT NULL,
+  `record_route` text,
   `expires` int(11) NOT NULL,
-  `status` int(11) NOT NULL DEFAULT 2,
+  `status` int(11) NOT NULL DEFAULT '2',
   `reason` char(64) NOT NULL,
-  `version` int(11) NOT NULL DEFAULT 0,
+  `version` int(11) NOT NULL DEFAULT '0',
   `socket_info` char(64) NOT NULL,
-  `local_contact` char(128) NOT NULL,
+  `local_contact` char(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rls_watcher_idx` (`presentity_uri`,`callid`,`to_tag`,`from_tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1525,6 +1431,30 @@ LOCK TABLES `route_tree` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `rtpengine`
+--
+
+DROP TABLE IF EXISTS `rtpengine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rtpengine` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `socket` text NOT NULL,
+  `set_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rtpengine`
+--
+
+LOCK TABLES `rtpengine` WRITE;
+/*!40000 ALTER TABLE `rtpengine` DISABLE KEYS */;
+/*!40000 ALTER TABLE `rtpengine` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `rtpproxy_sockets`
 --
 
@@ -1557,15 +1487,15 @@ DROP TABLE IF EXISTS `silo`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `silo` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `src_addr` char(128) NOT NULL DEFAULT '',
-  `dst_addr` char(128) NOT NULL DEFAULT '',
+  `src_addr` char(255) NOT NULL DEFAULT '',
+  `dst_addr` char(255) NOT NULL DEFAULT '',
   `username` char(64) NOT NULL DEFAULT '',
   `domain` char(64) NOT NULL DEFAULT '',
-  `inc_time` int(11) NOT NULL DEFAULT 0,
-  `exp_time` int(11) NOT NULL DEFAULT 0,
-  `snd_time` int(11) NOT NULL DEFAULT 0,
+  `inc_time` int(11) NOT NULL DEFAULT '0',
+  `exp_time` int(11) NOT NULL DEFAULT '0',
+  `snd_time` int(11) NOT NULL DEFAULT '0',
   `ctype` char(255) DEFAULT NULL,
-  `body` blob DEFAULT NULL,
+  `body` blob,
   PRIMARY KEY (`id`),
   KEY `account_idx` (`username`,`domain`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1591,10 +1521,10 @@ CREATE TABLE `sip_trace` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `time_stamp` datetime NOT NULL DEFAULT '1900-01-01 00:00:01',
   `callid` char(255) NOT NULL DEFAULT '',
-  `trace_attrs` char(128) DEFAULT NULL,
+  `trace_attrs` char(255) DEFAULT NULL,
   `msg` text NOT NULL,
   `method` char(32) NOT NULL DEFAULT '',
-  `status` char(128) DEFAULT NULL,
+  `status` char(255) DEFAULT NULL,
   `from_proto` char(5) NOT NULL,
   `from_ip` char(50) NOT NULL DEFAULT '',
   `from_port` int(5) unsigned NOT NULL,
@@ -1633,7 +1563,7 @@ CREATE TABLE `speed_dial` (
   `domain` char(64) NOT NULL DEFAULT '',
   `sd_username` char(64) NOT NULL DEFAULT '',
   `sd_domain` char(64) NOT NULL DEFAULT '',
-  `new_uri` char(128) NOT NULL DEFAULT '',
+  `new_uri` char(255) NOT NULL DEFAULT '',
   `fname` char(64) NOT NULL DEFAULT '',
   `lname` char(64) NOT NULL DEFAULT '',
   `description` char(64) NOT NULL DEFAULT '',
@@ -1667,7 +1597,6 @@ CREATE TABLE `subscriber` (
   `ha1` char(64) NOT NULL DEFAULT '',
   `ha1b` char(64) NOT NULL DEFAULT '',
   `rpid` char(64) DEFAULT NULL,
-  `dpid` int(11) DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_idx` (`username`,`domain`),
   KEY `username_idx` (`username`)
@@ -1694,18 +1623,18 @@ CREATE TABLE `tls_mgm` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `domain` char(64) NOT NULL,
   `address` char(64) DEFAULT NULL,
-  `type` int(1) NOT NULL DEFAULT 1,
+  `type` int(1) NOT NULL DEFAULT '1',
   `method` char(16) DEFAULT 'SSLv23',
-  `verify_cert` int(1) DEFAULT 1,
-  `require_cert` int(1) DEFAULT 1,
-  `certificate` blob DEFAULT NULL,
-  `private_key` blob DEFAULT NULL,
-  `crl_check_all` int(1) DEFAULT 0,
+  `verify_cert` int(1) DEFAULT '1',
+  `require_cert` int(1) DEFAULT '1',
+  `certificate` blob,
+  `private_key` blob,
+  `crl_check_all` int(1) DEFAULT '0',
   `crl_dir` char(255) DEFAULT NULL,
-  `ca_list` blob DEFAULT NULL,
+  `ca_list` mediumblob,
   `ca_dir` char(255) DEFAULT NULL,
   `cipher_list` char(255) DEFAULT NULL,
-  `dh_params` blob DEFAULT NULL,
+  `dh_params` blob,
   `ec_curve` char(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `domain_type_idx` (`domain`,`type`)
@@ -1760,7 +1689,7 @@ CREATE TABLE `userblacklist` (
   `username` char(64) NOT NULL DEFAULT '',
   `domain` char(64) NOT NULL DEFAULT '',
   `prefix` char(64) NOT NULL DEFAULT '',
-  `whitelist` tinyint(1) NOT NULL DEFAULT 0,
+  `whitelist` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `userblacklist_idx` (`username`,`domain`,`prefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -1785,10 +1714,10 @@ DROP TABLE IF EXISTS `usr_preferences`;
 CREATE TABLE `usr_preferences` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `uuid` char(64) NOT NULL DEFAULT '',
-  `username` char(128) NOT NULL DEFAULT '0',
+  `username` char(64) NOT NULL DEFAULT '0',
   `domain` char(64) NOT NULL DEFAULT '',
   `attribute` char(32) NOT NULL DEFAULT '',
-  `type` int(11) NOT NULL DEFAULT 0,
+  `type` int(11) NOT NULL DEFAULT '0',
   `value` char(128) NOT NULL DEFAULT '',
   `last_modified` datetime NOT NULL DEFAULT '1900-01-01 00:00:01',
   PRIMARY KEY (`id`),
@@ -1816,7 +1745,7 @@ DROP TABLE IF EXISTS `version`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `version` (
   `table_name` char(32) NOT NULL,
-  `table_version` int(10) unsigned NOT NULL DEFAULT 0,
+  `table_version` int(10) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `t_name_idx` (`table_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1827,7 +1756,7 @@ CREATE TABLE `version` (
 
 LOCK TABLES `version` WRITE;
 /*!40000 ALTER TABLE `version` DISABLE KEYS */;
-INSERT INTO `version` VALUES ('acc',7),('active_watchers',11),('address',5),('aliases',1009),('b2b_entities',1),('b2b_logic',3),('cachedb',2),('carrierfailureroute',2),('carrierroute',3),('cc_agents',1),('cc_cdrs',1),('cc_flows',1),('clusterer',2),('cpl',2),('dbaliases',2),('dialog',10),('dialplan',5),('dispatcher',8),('domain',3),('domainpolicy',3),('dr_carriers',2),('dr_gateways',6),('dr_groups',2),('dr_partitions',1),('dr_rules',3),('emergency_report',1),('emergency_routing',1),('emergency_service_provider',1),('fraud_detection',1),('globalblacklist',2),('grp',3),('imc_members',2),('imc_rooms',2),('load_balancer',2),('location',1011),('missed_calls',5),('presentity',5),('pua',8),('registrant',1),('re_grp',2),('rls_presentity',1),('rls_watchers',2),('route_tree',2),('rtpproxy_sockets',0),('silo',6),('sip_trace',5),('speed_dial',3),('subscriber',7),('tls_mgm',2),('uri',2),('userblacklist',2),('usr_preferences',3),('watchers',4),('xcap',4);
+INSERT INTO `version` VALUES ('acc',7),('active_watchers',12),('address',5),('b2b_entities',1),('b2b_logic',3),('cachedb',2),('carrierfailureroute',2),('carrierroute',3),('cc_agents',1),('cc_cdrs',1),('cc_flows',1),('clusterer',4),('cpl',2),('dbaliases',2),('dialog',10),('dialplan',5),('dispatcher',8),('domain',3),('domainpolicy',3),('dr_carriers',2),('dr_gateways',6),('dr_groups',2),('dr_partitions',1),('dr_rules',3),('emergency_report',1),('emergency_routing',1),('emergency_service_provider',1),('fraud_detection',1),('freeswitch',1),('globalblacklist',2),('grp',3),('imc_members',2),('imc_rooms',2),('load_balancer',2),('location',1013),('missed_calls',5),('presentity',5),('pua',8),('registrant',1),('re_grp',2),('rls_presentity',1),('rls_watchers',2),('route_tree',2),('rtpengine',1),('rtpproxy_sockets',0),('silo',6),('sip_trace',5),('speed_dial',3),('subscriber',7),('tls_mgm',2),('uri',2),('userblacklist',2),('usr_preferences',3),('watchers',4),('xcap',4);
 /*!40000 ALTER TABLE `version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1840,7 +1769,7 @@ DROP TABLE IF EXISTS `watchers`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `watchers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `presentity_uri` char(128) NOT NULL,
+  `presentity_uri` char(255) NOT NULL,
   `watcher_username` char(64) NOT NULL,
   `watcher_domain` char(64) NOT NULL,
   `event` char(64) NOT NULL DEFAULT 'presence',
@@ -1876,7 +1805,7 @@ CREATE TABLE `xcap` (
   `doc_type` int(11) NOT NULL,
   `etag` char(64) NOT NULL,
   `source` int(11) NOT NULL,
-  `doc_uri` char(128) NOT NULL,
+  `doc_uri` char(255) NOT NULL,
   `port` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_doc_type_idx` (`username`,`domain`,`doc_type`,`doc_uri`),
@@ -1902,4 +1831,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-06 14:25:20
+-- Dump completed on 2019-07-09 18:23:34

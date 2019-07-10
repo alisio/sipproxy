@@ -51,70 +51,65 @@ class opensips_control_panel (
     $db_opensips_pw = 'opensipsrw',
     $opensips_cp_packages = ['httpd',
                             'php',
-                            'php-gd',
                             'php-mysql',
-                            'php-xmlrpc',
+                            'php-gd',
                             'php-pear',
-                            'php-pecl-apcu',
+                            'php-pecl-apc',
                             'unzip',
                             'wget'],
     $proxy_transport = 'udp',
     $proxy_ip = $ipaddress,
     $opensips_cp_folder = '/var/www/html/opensips-cp',
     $opensips_cp_alias_folder = '/cp',
+    $opensips_cp_versao = '8.2.4',
     ){
     realize Package['epel-release']
     -> package { $opensips_cp_packages:
-     ensure => installed,
-     notify => Exec['install pear packages'],
-   }
+      ensure => installed,
+    }
     ~> service { 'httpd':
-      ensure => running,
-      enable => true,
+      ensure     => running,
+      enable     => true,
       hasrestart => true,
       hasstatus  => true,
-      require => Package[$opensips_cp_packages],
-    }
-    exec { 'install pear packages':
-      command => "pear install MDB2 MDB2#mysql log",
-      path => '/usr/bin:/usr/sbin:/bin:/usr/local/bin',
-      refreshonly => true,
+      require    => Package[$opensips_cp_packages],
     }
     file { '/etc/httpd/conf.d/opensips_cp.conf':
-      ensure => file,
+      ensure  => file,
       content => template("${name}/etc/httpd/conf.d/opensips_cp.conf.erb"),
-      mode => '0644',
+      mode    => '0644',
     }
-    file_line { 'php_config':
-      ensure            => present,
-      path              => '/etc/php.ini',
-      match             => '^ *short_open_tag *=.*',
-      match_for_absence => true,
-      line   => "short_open_tag = On",
-      require => Package[$opensips_cp_packages],
-      notify => Service['httpd'],
+    file { '/etc/cron.d/opensips_stats_cron':
+      ensure => file,
+      source => "puppet:///modules/${name}/etc/cron.d/opensips_stats_cron",
+      mode   => '0644',
+    }
+    ~> service { 'crond':
+      ensure     => running,
+      enable     => true,
+      hasrestart => true,
+      hasstatus  => true,
     }
     file { $opensips_cp_folder:
-      ensure => directory,
+      ensure  => directory,
       recurse => 'remote',
-      source => "puppet:///modules/${name}/$opensips_cp_folder",
-      mode => '0644',
-      owner => 'apache',
-      group => 'apache'
+      source  => "puppet:///modules/${name}/${opensips_cp_folder}_${opensips_cp_versao}",
+      mode    => '0644',
+      owner   => 'apache',
+      group   => 'apache'
     }
     file { '/root/ocp_sql_dump.sql':
       ensure => file,
-      mode => '0644',
+      mode   => '0644',
       source => "puppet:///modules/${name}/ocp_sql_dump.sql",
     }
-    mysql::db { $db_opensips_db:
-      user     => $db_opensips_user,
-      password => $db_opensips_pw,
-      host     => $db_server_ip,
-      grant    => ['ALL'],
-      sql      => '/root/ocp_sql_dump.sql',
+    -> mysql::db { $db_opensips_db:
+      user           => $db_opensips_user,
+      password       => $db_opensips_pw,
+      host           => $db_server_ip,
+      grant          => ['ALL'],
+      sql            => '/root/ocp_sql_dump.sql',
       import_cat_cmd => 'cat',
       import_timeout => 900,
-      require => File['/root/ocp_sql_dump.sql'],
     }
   }
